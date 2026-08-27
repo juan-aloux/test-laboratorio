@@ -1,0 +1,15 @@
+Fotos de la sección "Además de los análisis clínicos" (#servicios).
+
+Los nombres de archivo los usa el campo 'foto' de SERVICIOS en
+js/datos-sitio.js. Si cambias un nombre aquí, cámbialo también allá.
+
+  analisis-clinicos.jpg
+  electrocardiograma.jpg
+  colposcopia.jpg
+  audiometria.jpg
+  espirometria.jpg
+  audiometria-neonatal.jpg
+  asesorias.jpg
+
+Formato: 16:9 horizontal, 1200x669 px. Si reemplazas alguna, respeta la
+proporción: la tarjeta recorta al centro lo que se salga.

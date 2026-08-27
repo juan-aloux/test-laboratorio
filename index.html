@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ALMAR Laboratorio — Análisis clínicos con precios publicados</title>
+<meta name="description" content="Laboratorio de análisis clínicos ALMAR. Consulta el precio y la preparación de cada estudio antes de agendar. Resultados en línea validados y firmados.">
+<meta name="theme-color" content="#02AB02">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="ALMAR Laboratorio">
+<meta property="og:description" content="Análisis clínicos con precios publicados y resultados en línea.">
+<meta property="og:image" content="img/hero.jpg">
+<meta property="og:locale" content="es_MX">
+
+<link rel="icon" href="img/logo.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+<link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+<a class="salta-al-contenido" href="#contenido">Saltar al contenido</a>
+
+<!-- ==========================================================================
+     Cada sección es un componente definido en js/componentes.js.
+     Para editar el contenido de una sección, busca ahí su nombre.
+     Los datos que se repiten (sucursales, pasos, servicios) están en
+     js/datos-sucursales.js y js/datos-sitio.js.
+     ========================================================================== -->
+
+<almar-cabecera></almar-cabecera>
+
+<main id="contenido">
+  <almar-hero></almar-hero>
+  <almar-catalogo></almar-catalogo>
+  <almar-servicios></almar-servicios>
+  <almar-sucursales></almar-sucursales>
+  <almar-llamado></almar-llamado>
+
+  <noscript>
+    <section class="seccion">
+      <div class="contenedor">
+        <h2>ALMAR Laboratorio</h2>
+        <p class="seccion__intro">Este sitio necesita JavaScript para mostrarse completo. Mientras tanto, estos son nuestros datos de contacto.</p>
+        <ul>
+          <li><strong>Matriz</strong> — 5 Oriente No. 406, Col. Centro, Tecamachalco, Puebla. Tel. 249-422-4054 y 249-422-0913. 7:00 am a 7:00 pm.</li>
+          <li><strong>Centro Médico</strong> — Av. 6 Sur No. 106, Tecamachalco, Puebla. Tel. 249-422-6598. Abierto las 24 horas.</li>
+          <li><strong>San Gabriel</strong> — Av. Manuel Ávila Camacho No. 15. Tel. 237-688-0391. 7:00 am a 3:00 pm.</li>
+          <li><strong>Tlacotepec</strong> — Carretera Nacional No. 5, Tlacotepec, Puebla. Tel. 237-381-6182. 7:00 am a 3:00 pm.</li>
+          <li><strong>Huixcolotla</strong> — Bulevar 16 de Septiembre No. 903-A, San Salvador Huixcolotla. Tel. 249-425-0805. 7:00 am a 3:00 pm.</li>
+          <li><strong>Tepeaca</strong> — Av. Hidalgo No. 301, Col. Centro, Tepeaca, Puebla. Tel. 223-275-2702. 7:00 am a 3:00 pm.</li>
+          <li><strong>Los Reyes</strong> — Jesús N. Merino No. 118-C, Los Reyes de Juárez, Puebla. Tel. 249-688-0191. 7:00 am a 3:00 pm.</li>
+        </ul>
+      </div>
+    </section>
+  </noscript>
+</main>
+
+<almar-pie></almar-pie>
+
+<!-- Orden obligatorio: iconos y datos primero (componentes.js los usa al
+     pintar), y principal.js al final, cuando el DOM ya está completo. -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="js/iconos.js"></script>
+<script src="js/estudios.js"></script>
+<script src="js/datos-sucursales.js"></script>
+<script src="js/datos-sitio.js"></script>
+<script src="js/componentes.js"></script>
+<script src="js/principal.js"></script>
+<script src="js/carrusel.js"></script>
+</body>
+</html>
