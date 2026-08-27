@@ -393,6 +393,266 @@
     });
   }
 
+  /* --- Chat de MIA ------------------------------------------------------ */
+  /* Maqueta: MIA responde con el guion fijo de js/datos-chat.js. La
+     conversación vive solo en memoria, así que recargar la página empieza de
+     cero — es lo que se pidió. */
+
+  var chat           = document.getElementById('chat-mia');
+  var chatBoton      = document.getElementById('chat-abrir');
+  var chatPanel      = document.getElementById('chat-panel');
+  var chatCerrar     = document.getElementById('chat-cerrar');
+  var chatHilo       = document.getElementById('chat-hilo');
+  var chatSugerencias= document.getElementById('chat-sugerencias');
+  var chatForm       = document.getElementById('chat-form');
+  var chatTexto      = document.getElementById('chat-texto');
+
+  if (chat && chatBoton && chatPanel && chatHilo && chatForm && chatTexto &&
+      typeof CHAT_MIA !== 'undefined') {
+
+    var chatIniciado = false;   // el saludo se pinta al abrir, no antes
+    var chatPensando = null;    // el globo de puntos, mientras está en pantalla
+    var chatEspera   = null;
+    var chatSaludo   = null;    // temporizador del icono que invita al clic
+
+    function chatAlFinal() {
+      chatHilo.scrollTop = chatHilo.scrollHeight;
+    }
+
+    function chatAgregar(texto, autor) {
+      var globo = document.createElement('div');
+      globo.className = 'chat__mensaje chat__mensaje--' + autor;
+      globo.textContent = texto;   // sin innerHTML: el texto del paciente entra tal cual
+      chatHilo.appendChild(globo);
+      chatAlFinal();
+    }
+
+    function chatSugerir() {
+      if (!chatSugerencias) return;
+      chatSugerencias.innerHTML = CHAT_MIA.sugerencias.map(function (t) {
+        return '<button class="chat__chip" type="button">' + limpiar(t) + '</button>';
+      }).join('');
+    }
+
+    // La primera respuesta cuya clave aparezca en el mensaje, sin acentos.
+    function chatRespuesta(texto) {
+      var t = normalizar(texto);
+      for (var i = 0; i < CHAT_MIA.respuestas.length; i++) {
+        var r = CHAT_MIA.respuestas[i];
+        for (var j = 0; j < r.claves.length; j++) {
+          if (t.indexOf(normalizar(r.claves[j])) !== -1) return r.texto;
+        }
+      }
+      return CHAT_MIA.respaldo;
+    }
+
+    function chatResponder(texto) {
+      clearTimeout(chatEspera);
+
+      chatPensando = document.createElement('div');
+      chatPensando.className = 'chat__escribiendo';
+      chatPensando.setAttribute('aria-label', CHAT_MIA.nombre + ' está escribiendo');
+      chatPensando.innerHTML = '<span></span><span></span><span></span>';
+      chatHilo.appendChild(chatPensando);
+      chatAlFinal();
+
+      chatEspera = setTimeout(function () {
+        if (chatPensando) {
+          chatPensando.remove();
+          chatPensando = null;
+        }
+        chatAgregar(chatRespuesta(texto), 'mia');
+      }, 700);
+    }
+
+    function chatEnviar(texto) {
+      var limpio = texto.trim();
+      if (!limpio) return;
+
+      chatAgregar(limpio, 'usuario');
+      if (chatSugerencias) chatSugerencias.innerHTML = '';
+      chatTexto.value = '';
+      chatTexto.style.height = 'auto';
+      chatResponder(limpio);
+    }
+
+    function chatAbrir() {
+      chatPanel.hidden = false;
+      chat.classList.add('chat--abierto');
+      chat.classList.remove('chat--saludando');
+      chatBoton.setAttribute('aria-expanded', 'true');
+      chatBoton.setAttribute('aria-label', 'Cerrar el chat con ' + CHAT_MIA.nombre);
+
+      if (!chatIniciado) {
+        chatAgregar(CHAT_MIA.saludo, 'mia');
+        chatSugerir();
+        chatIniciado = true;
+      }
+
+      chatTexto.focus();
+      chatAlFinal();
+    }
+
+    function chatCerrarPanel(devolverFoco) {
+      chatPanel.hidden = true;
+      chat.classList.remove('chat--abierto');
+      chatBoton.setAttribute('aria-expanded', 'false');
+      chatBoton.setAttribute('aria-label', 'Abrir el chat con ' + CHAT_MIA.nombre);
+      if (devolverFoco) chatBoton.focus();
+    }
+
+    chatBoton.addEventListener('click', function () {
+      if (chatPanel.hidden) chatAbrir();
+      else chatCerrarPanel(false);
+    });
+
+    if (chatCerrar) {
+      chatCerrar.addEventListener('click', function () { chatCerrarPanel(true); });
+    }
+
+    if (chatSugerencias) {
+      chatSugerencias.addEventListener('click', function (e) {
+        var chip = e.target.closest('.chat__chip');
+        if (chip) chatEnviar(chip.textContent);
+      });
+    }
+
+    chatForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      chatEnviar(chatTexto.value);
+    });
+
+    // Enter envía; Shift+Enter salta de línea.
+    chatTexto.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        chatEnviar(chatTexto.value);
+      }
+    });
+
+    // El campo crece con el texto hasta el tope de max-height del CSS.
+    chatTexto.addEventListener('input', function () {
+      chatTexto.style.height = 'auto';
+      chatTexto.style.height = Math.min(chatTexto.scrollHeight, 104) + 'px';
+    });
+
+    /* Cada 10 s el icono del botón cambia a la mano durante 2 s y regresa al
+       de mensaje. Es solo una invitación a dar clic: el cruce entre iconos lo
+       hace el CSS, aquí solo se enciende y apaga la clase. */
+    function chatCicloSaludo() {
+      chatSaludo = setInterval(function () {
+        if (!chatPanel.hidden) return;      // con el chat abierto, no estorbar
+        chat.classList.add('chat--saludando');
+        setTimeout(function () {
+          chat.classList.remove('chat--saludando');
+        }, 2000);
+      }, 10000);
+    }
+
+    // Quien pidió menos movimiento no ve el ciclo. Es el mismo criterio de la
+    // media query de la hoja de estilos, aplicado donde el CSS no alcanza.
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      chatCicloSaludo();
+    }
+
+    // Escape cierra el chat, pero si el modal del catálogo está abierto es
+    // suyo el Escape: el chat queda oculto detrás de él.
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || chatPanel.hidden) return;
+      if (modal && !modal.hidden) return;
+      chatCerrarPanel(true);
+    });
+  }
+
+  /* --- Elección de sucursal --------------------------------------------- */
+  /* El pie no puede mostrar una sola dirección: hay siete sucursales con datos
+     distintos. Al entrar se pregunta cuál queda más cerca y con esa respuesta
+     se pinta el bloque CONTACTO.
+
+     El diálogo no se puede cerrar sin elegir: no tiene botón de cerrar, el velo
+     no responde al clic y aquí se atrapa Escape. */
+
+  var modalSuc   = document.getElementById('modal-sucursal');
+  var listaSuc   = document.getElementById('eleccion-lista');
+  var SUCURSAL_ACTIVA = null;   // la elección vive en memoria, no se persiste
+
+  function pintarContactoPie(suc) {
+    var direccion = document.getElementById('pie-direccion');
+    var telefonos = document.getElementById('pie-telefonos');
+    var horario   = document.getElementById('pie-horario');
+
+    if (direccion) {
+      direccion.innerHTML = suc.direccion.map(limpiar).join('<br>');
+    }
+
+    if (telefonos) {
+      telefonos.innerHTML = suc.telefonos.map(function (t) {
+        return '<a href="tel:' + limpiar(t.tel) + '">' + limpiar(t.texto) + '</a>';
+      }).join('<br>');
+    }
+
+    if (horario) {
+      // En Centro Médico el texto ya dice "Abierto las 24 horas": ponerle
+      // "Lun a Sáb" delante sería falso. Los datos no traen horario de
+      // domingo, así que ese renglón se omite en vez de inventarlo.
+      horario.textContent = suc.abierto24
+        ? suc.horario
+        : 'Lun a Sáb ' + suc.horario;
+    }
+  }
+
+  function elegirSucursal(indice) {
+    var suc = SUCURSALES[Number(indice)];
+    if (!suc) return;
+
+    SUCURSAL_ACTIVA = suc;
+    pintarContactoPie(suc);
+
+    modalSuc.hidden = true;
+    document.body.classList.remove('con-modal');
+  }
+
+  if (modalSuc && listaSuc && typeof SUCURSALES !== 'undefined') {
+    listaSuc.addEventListener('click', function (e) {
+      var opcion = e.target.closest('.eleccion__opcion');
+      if (opcion) elegirSucursal(opcion.dataset.sucursal);
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (modalSuc.hidden) return;
+
+      // Escape se traga a propósito: de aquí solo se sale eligiendo.
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        return;
+      }
+
+      if (e.key !== 'Tab') return;
+
+      var focales = modalSuc.querySelectorAll('.eleccion__opcion');
+      if (!focales.length) return;
+
+      var primero = focales[0];
+      var ultimo  = focales[focales.length - 1];
+
+      if (e.shiftKey && document.activeElement === primero) {
+        e.preventDefault();
+        ultimo.focus();
+      } else if (!e.shiftKey && document.activeElement === ultimo) {
+        e.preventDefault();
+        primero.focus();
+      }
+    });
+
+    // Se abre de inmediato: componentes.js ya pintó el diálogo cuando este
+    // archivo corre, así que no hace falta esperar a DOMContentLoaded.
+    modalSuc.hidden = false;
+    document.body.classList.add('con-modal');
+
+    var primeraOpcion = modalSuc.querySelector('.eleccion__opcion');
+    if (primeraOpcion) primeraOpcion.focus();
+  }
+
   /* --- Año del pie ------------------------------------------------------ */
 
   var anio = document.getElementById('anio');

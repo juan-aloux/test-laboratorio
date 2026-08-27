@@ -116,8 +116,8 @@ a:hover { color: var(--verde-hover); }
 .boton:active { transform: translateY(1px); }
 
 /* Texto marino sobre el verde de marca: blanco sólo daría 3.0:1 */
-.boton--primario { background: var(--verde); color: var(--marino-fuerte); }
-.boton--primario:hover { background: oklch(0.60 0.205 142.5); color: var(--marino-fuerte); }
+.boton--primario { background: var(--verde); color: var(--blanco); }
+.boton--primario:hover { background: oklch(0.60 0.205 142.5); color: var(--blanco); }
 
 .boton--linea {
   background: transparent;
@@ -320,7 +320,7 @@ a:hover { color: var(--verde-hover); }
   padding-inline: 20px;
   background: var(--blanco);
   border: 1px solid var(--borde-verde);
-  border-radius: 100px;
+  border-radius: var(--radio);
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -476,7 +476,7 @@ a:hover { color: var(--verde-hover); }
   font-weight: 700;
   letter-spacing: .10em;
 }
-.sucursal__insignia--principal { background: var(--verde); color: var(--marino-fuerte); }
+.sucursal__insignia--principal { background: var(--verde); color: var(--blanco); }
 .sucursal__insignia--horario {
   background: oklch(0.945 0.035 130);
   border: 1px solid var(--borde-verde);
@@ -649,6 +649,9 @@ a:hover { color: var(--verde-hover); }
 }
 .pie__columna a,
 .pie__dato { font-size: 14.5px; line-height: 1.6; color: var(--texto-claro); }
+/* Los datos de contacto arrancan vacíos hasta que se elige sucursal; sin esto
+   dejarían el hueco del gap de la columna. */
+.pie__dato:empty { display: none; }
 .pie__columna a:hover { color: var(--lima); }
 
 .pie__legal {
@@ -697,7 +700,7 @@ a:hover { color: var(--verde-hover); }
   padding-inline: 16px;
   background: var(--gris-suave);
   border: 1px solid var(--borde);
-  border-radius: 100px;
+  border-radius: var(--radio);
   transition: border-color .18s ease, background-color .18s ease;
 }
 .catalogo__busqueda:focus-within { border-color: var(--verde); background: var(--blanco); }
@@ -711,7 +714,7 @@ a:hover { color: var(--verde-hover); }
 }
 .catalogo__busqueda input:focus { outline: none; }
 .catalogo__busqueda input::placeholder { color: var(--texto-tenue); }
-/* Safari pinta su propia X en los input[type=search]; sobra junto al óvalo. */
+/* Safari pinta su propia X en los input[type=search]; sobra junto a la lupa. */
 .catalogo__busqueda input::-webkit-search-decoration,
 .catalogo__busqueda input::-webkit-search-cancel-button { -webkit-appearance: none; }
 
@@ -757,7 +760,7 @@ a:hover { color: var(--verde-hover); }
   padding-inline: 14px;
   background: var(--blanco);
   border: 1px solid var(--borde-verde);
-  border-radius: 100px;
+  border-radius: var(--radio);
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -916,6 +919,390 @@ body.con-modal { overflow: hidden; }
 
 .modal__acciones { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--borde-suave); }
 
+/* --- Elección de sucursal ------------------------------------------------ */
+/* Reusa el esqueleto del modal del catálogo (.modal, .modal__velo,
+   .modal__panel, .modal__cuerpo, .modal__tipo y la animación modal-entra).
+   Aquí solo van las diferencias: panel más angosto, sin botón de cerrar, y la
+   lista de opciones. */
+
+/* Por encima de la cabecera pegajosa (100). El modal del catálogo se queda en
+   60 porque se cierra solo y la cabecera encima no estorba, pero este bloquea
+   el sitio: si la cabecera quedara encima, el panel se vería cortado y sus
+   enlaces seguirían siendo clicables a través del diálogo. */
+.eleccion { z-index: 150; }
+
+.eleccion__panel { max-width: 560px; }
+
+/* Sin padding-right: no hay botón de cerrar que esquivar. */
+.eleccion__encabezado { margin-bottom: 22px; }
+.eleccion__encabezado h3 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.25;
+  color: var(--marino);
+}
+.eleccion__intro {
+  margin-top: 10px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--texto-tenue);
+}
+
+.eleccion__lista { display: grid; gap: 8px; }
+
+.eleccion__opcion {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  padding: 14px 18px;
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  font-family: var(--cuerpo);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease, transform .18s ease;
+}
+.eleccion__opcion:hover { background: var(--gris-suave); border-color: var(--verde); }
+.eleccion__opcion:active { transform: translateY(1px); }
+
+.eleccion__nombre {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--marino);
+}
+.eleccion__insignia {
+  padding: 3px 9px;
+  background: var(--crema);
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--verde-oscuro);
+}
+
+.eleccion__direccion {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--texto-tenue);
+}
+/* El pin no debe encogerse cuando la dirección es larga. */
+.eleccion__pin { display: inline-flex; flex-shrink: 0; color: var(--verde-oscuro); }
+
+/* --- Chat de MIA -------------------------------------------------------- */
+/* Widget flotante. Sus radios son propios y grandes: el --radio: 4px del
+   resto del sitio es anguloso a propósito, y un chat pide lo contrario. */
+.chat {
+  --chat-radio: 20px;
+  --chat-radio-burbuja: 18px;
+  --chat-fab: 60px;
+
+  position: fixed;
+  right: clamp(16px, 4vw, 28px);
+  bottom: clamp(16px, 4vw, 28px);
+  z-index: 90;                 /* sobre el contenido, bajo la cabecera (100) */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+/* Mientras el modal del catálogo está abierto, el chat estorba. */
+body.con-modal .chat { display: none; }
+
+/* --- Burbuja ------------------------------------------------------------ */
+.chat__burbuja {
+  /* Grid de una celda: los tres iconos se apilan ahí y se cruzan por opacidad. */
+  display: grid;
+  place-items: center;
+  width: var(--chat-fab);
+  height: var(--chat-fab);
+  padding: 0;
+  background: var(--verde);
+  color: var(--blanco);
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 10px 26px oklch(0.28 0.062 252 / .28);
+  cursor: pointer;
+  position: relative;        /* ancla del anillo del pulso */
+  transition: background-color .18s ease, box-shadow .18s ease;
+  animation: chat-entra .5s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+
+/* Pulso continuo. Va en un anillo aparte y no en el box-shadow del botón:
+   así el botón deja libre su 'transform' para el rebote de entrada y el
+   hover, y el anillo se compone en GPU en vez de repintar la sombra. */
+.chat__burbuja::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;              /* detrás del botón: nunca tapa el icono */
+  background: var(--verde);
+  border-radius: 50%;
+  animation: chat-pulso 2s ease-out infinite;
+}
+@keyframes chat-pulso {
+  0%        { opacity: .55; transform: scale(1); }
+  70%, 100% { opacity: 0;   transform: scale(1.55); }
+}
+.chat__burbuja:hover { background: oklch(0.60 0.205 142.5); }
+.chat__burbuja:active { transform: translateY(1px); }
+
+/* Con el panel abierto la burbuja deja de latir.
+   El anillo se apaga con opacity: sin animación vuelve a su estado opaco. */
+.chat--abierto .chat__burbuja { animation: none; }
+.chat--abierto .chat__burbuja::after { animation: none; opacity: 0; }
+
+/* Los tres iconos comparten la celda del grid. No se alternan con 'display'
+   —que no es animable— sino cruzándose por opacidad, de ahí el apilado. */
+.chat__burbuja-icono {
+  grid-area: 1 / 1;
+  display: flex;
+  opacity: 0;
+  transform: scale(.6) rotate(-12deg);
+  transition: opacity .45s ease, transform .45s ease;
+}
+
+/* En reposo manda el icono de mensaje. */
+.chat__burbuja-icono--chat { opacity: 1; transform: none; }
+
+/* Cada tanto se asoma la mano, 2 s. La clase la pone y la quita principal.js. */
+.chat--saludando .chat__burbuja-icono--chat   { opacity: 0; transform: scale(.6) rotate(12deg); }
+.chat--saludando .chat__burbuja-icono--saludo { opacity: 1; transform: none; }
+
+/* Con el panel abierto manda la cruz, aunque el saludo estuviera a medias.
+   Va después de .chat--saludando a propósito: misma especificidad, gana el
+   que se declara al final. */
+.chat--abierto .chat__burbuja-icono--chat,
+.chat--abierto .chat__burbuja-icono--saludo { opacity: 0; transform: scale(.6); }
+.chat--abierto .chat__burbuja-icono--cerrar { opacity: 1; transform: none; }
+
+/* Rebote de aparición, una sola vez al cargar. */
+@keyframes chat-entra {
+  from { opacity: 0; transform: scale(.4); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* --- Panel -------------------------------------------------------------- */
+.chat__panel {
+  display: flex;
+  flex-direction: column;
+  width: min(380px, calc(100vw - 32px));
+  height: min(560px, calc(100dvh - 150px));
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--chat-radio);
+  box-shadow: 0 24px 60px oklch(0.28 0.062 252 / .22);
+  overflow: hidden;
+  transform-origin: bottom right;
+  animation: chat-panel-entra .22s cubic-bezier(.2, .8, .3, 1);
+}
+.chat__panel[hidden] { display: none; }
+
+@keyframes chat-panel-entra {
+  from { opacity: 0; transform: translateY(12px) scale(.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.chat__cabecera {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px 14px 16px;
+  background: var(--marino);
+  color: var(--blanco);
+}
+.chat__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  background: var(--verde);
+  color: var(--marino-fuerte);
+  border-radius: 50%;
+}
+.chat__identidad { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.chat__identidad strong {
+  font-family: var(--titulo);
+  font-size: 16px;
+  letter-spacing: .01em;
+}
+.chat__estado {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--texto-claro);
+}
+.chat__estado::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  background: var(--verde-footer);
+  border-radius: 50%;
+}
+.chat__cerrar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  border: 1px solid oklch(1 0 0 / .22);
+  border-radius: 50%;
+  color: var(--blanco);
+  cursor: pointer;
+  transition: background-color .18s ease;
+}
+.chat__cerrar:hover { background: oklch(1 0 0 / .12); }
+
+/* --- Hilo de mensajes --------------------------------------------------- */
+.chat__hilo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 16px;
+  overflow-y: auto;
+  background: var(--gris-suave);
+  overscroll-behavior: contain;
+}
+
+.chat__mensaje {
+  max-width: 84%;
+  padding: 11px 14px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  animation: chat-mensaje-entra .2s ease-out;
+}
+@keyframes chat-mensaje-entra {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.chat__mensaje--mia {
+  align-self: flex-start;
+  background: var(--blanco);
+  border: 1px solid var(--borde-suave);
+  border-radius: var(--chat-radio-burbuja) var(--chat-radio-burbuja) var(--chat-radio-burbuja) 4px;
+  color: var(--texto);
+}
+.chat__mensaje--usuario {
+  align-self: flex-end;
+  background: var(--verde);
+  border-radius: var(--chat-radio-burbuja) var(--chat-radio-burbuja) 4px var(--chat-radio-burbuja);
+  color: var(--marino-fuerte);
+  font-weight: 500;
+}
+
+/* Tres puntos mientras "escribe" MIA. */
+.chat__escribiendo {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 14px;
+  background: var(--blanco);
+  border: 1px solid var(--borde-suave);
+  border-radius: var(--chat-radio-burbuja) var(--chat-radio-burbuja) var(--chat-radio-burbuja) 4px;
+}
+.chat__escribiendo span {
+  width: 7px;
+  height: 7px;
+  background: var(--texto-tenue);
+  border-radius: 50%;
+  animation: chat-punto 1.1s ease-in-out infinite;
+}
+.chat__escribiendo span:nth-child(2) { animation-delay: .15s; }
+.chat__escribiendo span:nth-child(3) { animation-delay: .3s; }
+@keyframes chat-punto {
+  0%, 60%, 100% { opacity: .3; transform: translateY(0); }
+  30%           { opacity: 1;  transform: translateY(-4px); }
+}
+
+/* --- Sugerencias -------------------------------------------------------- */
+.chat__sugerencias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 16px 14px;
+  background: var(--gris-suave);
+}
+.chat__sugerencias:empty { display: none; }
+
+.chat__chip {
+  padding: 8px 14px;
+  background: var(--blanco);
+  border: 1px solid var(--borde-verde);
+  border-radius: 999px;
+  font-family: var(--cuerpo);
+  font-size: 13.5px;
+  color: var(--verde-oscuro);
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease;
+}
+.chat__chip:hover { background: var(--crema); border-color: var(--verde); }
+
+/* --- Composer ----------------------------------------------------------- */
+.chat__composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 12px 14px 10px;
+  background: var(--blanco);
+  border-top: 1px solid var(--borde);
+}
+.chat__composer textarea {
+  flex: 1;
+  max-height: 104px;
+  padding: 11px 14px;
+  border: 1px solid var(--borde);
+  border-radius: var(--chat-radio-burbuja);
+  font-family: var(--cuerpo);
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--texto);
+  background: var(--gris-suave);
+  resize: none;
+  overflow-y: auto;
+}
+.chat__composer textarea:focus { outline: none; border-color: var(--verde); background: var(--blanco); }
+.chat__composer textarea:focus-visible { outline: 3px solid var(--azul); outline-offset: 1px; }
+
+.chat__enviar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  background: var(--verde);
+  color: var(--marino-fuerte);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color .18s ease;
+}
+.chat__enviar:hover { background: oklch(0.60 0.205 142.5); }
+
+.chat__aviso {
+  padding: 0 16px 12px;
+  background: var(--blanco);
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--texto-tenue);
+  text-align: center;
+}
+
 /* ==========================================================================
    Responsive
    ========================================================================== */
@@ -1014,7 +1401,9 @@ body.con-modal { overflow: hidden; }
   .modal { padding: 0; }
   .modal__panel { max-width: none; max-height: none; height: 100%; border-radius: 0; }
   .modal__cuerpo { padding: 26px 22px 24px; }
-  .modal__encabezado h3 { font-size: 21px; }
+  .modal__encabezado h3,
+  .eleccion__encabezado h3 { font-size: 21px; }
+  .eleccion__opcion { padding: 13px 15px; }
   .modal__resumen { gap: 20px; padding: 16px 18px; }
 
   .paquete__precio { font-size: 38px; }
@@ -1034,6 +1423,10 @@ body.con-modal { overflow: hidden; }
   .servicios__domicilio { padding: 20px 18px; }
   .sucursal__mapa,
   .sucursal__dato { min-height: 44px; }
+
+  /* El panel del chat casi llena el ancho, y deja libre la cabecera sticky. */
+  .chat { right: 12px; bottom: 12px; gap: 10px; --chat-fab: 54px; }
+  .chat__panel { width: calc(100vw - 24px); height: min(520px, calc(100dvh - 110px)); }
 }
 
 /* --- Accesibilidad e impresión ----------------------------------------- */
@@ -1043,11 +1436,15 @@ body.con-modal { overflow: hidden; }
     transition-duration: .01ms !important;
     scroll-behavior: auto !important;
   }
+  /* El comodín acorta la duración pero deja el bucle repitiéndose; el pulso
+     y el giro de la burbuja y los puntos de "escribiendo" hay que apagarlos. */
+  .chat__burbuja, .chat__escribiendo span { animation: none !important; }
+  .chat__burbuja::after { animation: none !important; opacity: 0; }
 }
 
 @media print {
   .nav, .llamado, .carrusel__pie, .carrusel__barra, .sucursal__mapa,
-  .catalogo__busqueda, .paginacion, .modal { display: none; }
+  .catalogo__busqueda, .paginacion, .modal, .chat { display: none; }
   .cabecera { position: static; }
   body { background: #fff; }
   .estudio, .sucursal, .servicio { break-inside: avoid; }

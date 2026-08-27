@@ -73,17 +73,16 @@ const PIE_COLUMNAS = [
       { texto: 'Catálogo completo',      href: '#estudios' },
       { texto: 'Paquetes',               href: '#estudios' },
       { texto: 'Toma a domicilio',       href: '#estudios' },
-      { texto: 'Servicios',              href: '#servicios' },
       { texto: 'Convenios con empresas', href: '#contacto' }
     ]
   },
   {
-    titulo: 'PACIENTES',
-    enlaces: [
-      { texto: 'Sucursales y horarios',  href: '#sucursales' },
-      { texto: 'Preguntas frecuentes',   href: '#contacto' },
-      { texto: 'Facturación',            href: '#contacto' }
-    ]
+    titulo: 'SERVICIOS',
+    // Se generan desde SERVICIOS (arriba en este mismo archivo): agregar o
+    // quitar un servicio ahí lo agrega o lo quita también del pie.
+    enlaces: SERVICIOS.map(function (s) {
+      return { texto: s.titulo, href: '#servicios' };
+    })
   }
 ];
 

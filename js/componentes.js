@@ -374,12 +374,14 @@
 
             columnas +
 
+            /* Los datos de contacto dependen de la sucursal que el visitante
+               elige al entrar. Arrancan vacíos; principal.js los pinta.
+               El <noscript> de index.html cubre el caso sin JS. */
             '<div class="pie__columna">' +
               '<span class="pie__titulo">CONTACTO</span>' +
-              '<address class="pie__dato" style="font-style: normal">[DIRECCIÓN COMPLETA]<br>[COLONIA, CIUDAD, CP]</address>' +
-              '<a class="pie__dato" href="tel:[TELÉFONO]">[TELÉFONO]</a>' +
-              '<a class="pie__dato" href="mailto:[CORREO]">[CORREO]</a>' +
-              '<span class="pie__dato">Lun a Sáb [HORARIO]<br>Dom [HORARIO]</span>' +
+              '<address class="pie__dato" style="font-style: normal" id="pie-direccion"></address>' +
+              '<span class="pie__dato" id="pie-telefonos"></span>' +
+              '<span class="pie__dato" id="pie-horario"></span>' +
             '</div>' +
           '</div>' +
 
@@ -393,6 +395,107 @@
           '</div>' +
         '</div>' +
       '</footer>';
+  });
+
+  /* --- Elección de sucursal ----------------------------------------------- */
+  /* Diálogo que aparece al entrar al sitio. No se puede cerrar: no lleva botón
+     de cerrar, el velo no cierra al hacer clic y principal.js atrapa Escape.
+     Sale solo cuando el visitante elige una sucursal.
+
+     Reusa el esqueleto del modal del catálogo (.modal, .modal__velo,
+     .modal__panel, .modal__cuerpo); solo agrega las clases .eleccion__*.
+
+     Arranca oculto; principal.js lo abre y escucha los clics. */
+
+  componente('almar-sucursal-modal', function () {
+    // El valor es el índice en SUCURSALES, no el nombre: sobrevive a cambios
+    // de redacción y evita cargar con acentos en el dataset.
+    var opciones = SUCURSALES.map(function (suc, i) {
+      var insignia = suc.insignia
+        ? '<span class="eleccion__insignia">' + suc.insignia + '</span>'
+        : '';
+
+      return '<button class="eleccion__opcion" type="button" data-sucursal="' + i + '">' +
+               '<span class="eleccion__nombre">' + suc.nombre + insignia + '</span>' +
+               '<span class="eleccion__direccion">' +
+                 '<span class="eleccion__pin" aria-hidden="true">' + I.pin(14) + '</span>' +
+                 suc.direccion[0] +
+               '</span>' +
+             '</button>';
+    }).join('');
+
+    return '' +
+      '<div class="modal eleccion" id="modal-sucursal" hidden>' +
+        /* Sin data-cerrar-modal: el clic fuera no cierra. */
+        '<div class="modal__velo"></div>' +
+        '<div class="modal__panel eleccion__panel" role="dialog" aria-modal="true" ' +
+             'aria-labelledby="eleccion-titulo" aria-describedby="eleccion-intro">' +
+          '<div class="modal__cuerpo">' +
+            '<div class="eleccion__encabezado">' +
+              '<span class="modal__tipo">SUCURSALES</span>' +
+              '<h3 id="eleccion-titulo">¿Qué sucursal quieres consultar?</h3>' +
+              '<p class="eleccion__intro" id="eleccion-intro">' +
+                'Te mostramos los datos de la que elijas.' +
+              '</p>' +
+            '</div>' +
+            '<div class="eleccion__lista" id="eleccion-lista">' + opciones + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  });
+
+  /* --- Chat de MIA -------------------------------------------------------- */
+  /* Widget flotante, fijo en la esquina inferior derecha. El hilo arranca
+     vacío: principal.js pinta el saludo y las sugerencias la primera vez que
+     se abre, igual que el modal del catálogo se llena al abrirse.
+
+     El guion de MIA vive en js/datos-chat.js. */
+
+  componente('almar-chat', function () {
+    return '' +
+      '<div class="chat" id="chat-mia">' +
+
+        '<div class="chat__panel" id="chat-panel" role="dialog" ' +
+             'aria-label="Chat con ' + CHAT_MIA.nombre + ', ' + CHAT_MIA.rol.toLowerCase() + '" hidden>' +
+
+          '<header class="chat__cabecera">' +
+            '<span class="chat__avatar" aria-hidden="true">' + I.chispa(18) + '</span>' +
+            '<span class="chat__identidad">' +
+              '<strong>' + CHAT_MIA.nombre + '</strong>' +
+              '<span class="chat__estado">' + CHAT_MIA.rol + ' · ' + CHAT_MIA.estado + '</span>' +
+            '</span>' +
+            '<button class="chat__cerrar" type="button" id="chat-cerrar" ' +
+                    'aria-label="Cerrar el chat">' + I.cerrar(18) + '</button>' +
+          '</header>' +
+
+          '<div class="chat__hilo" id="chat-hilo" role="log" aria-live="polite"></div>' +
+
+          '<div class="chat__sugerencias" id="chat-sugerencias"></div>' +
+
+          '<form class="chat__composer" id="chat-form">' +
+            '<label class="oculto-visualmente" for="chat-texto">Escribe tu mensaje para ' + CHAT_MIA.nombre + '</label>' +
+            '<textarea id="chat-texto" rows="1" placeholder="Escribe tu mensaje…" ' +
+                      'autocomplete="off"></textarea>' +
+            '<button class="chat__enviar" type="submit" aria-label="Enviar mensaje">' +
+              I.enviar(18) +
+            '</button>' +
+          '</form>' +
+
+          '<p class="chat__aviso">MIA es un asistente automático. Para casos ' +
+            'clínicos, llama a tu sucursal.</p>' +
+        '</div>' +
+
+        '<button class="chat__burbuja" type="button" id="chat-abrir" ' +
+                'aria-expanded="false" aria-controls="chat-panel" ' +
+                'aria-label="Abrir el chat con ' + CHAT_MIA.nombre + '">' +
+          /* Los tres iconos van apilados en la misma celda y se cruzan por
+             opacidad; CSS decide cuál se ve según el estado del chat. */
+          '<span class="chat__burbuja-icono chat__burbuja-icono--chat" aria-hidden="true">' + I.chatBurbuja(26) + '</span>' +
+          '<span class="chat__burbuja-icono chat__burbuja-icono--saludo" aria-hidden="true">' + I.conversacion(26) + '</span>' +
+          '<span class="chat__burbuja-icono chat__burbuja-icono--cerrar" aria-hidden="true">' + I.cerrar(22) + '</span>' +
+        '</button>' +
+
+      '</div>';
   });
 
 })();

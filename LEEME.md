@@ -16,6 +16,7 @@ sitio/
 │   ├── estudios.js         ← EL CATÁLOGO. Edita aquí los estudios.
 │   ├── datos-sucursales.js ← LAS SUCURSALES.
 │   ├── datos-sitio.js      ← Pasos, servicios y enlaces del pie.
+│   ├── datos-chat.js       ← EL GUION DE MIA, el chat flotante.
 │   └── principal.js        Filtros, buscador, menú, validación
 └── img/
     ├── logo.png            Logo (recortado, sin margen vacío)
@@ -62,9 +63,6 @@ grep -rn "\[[A-ZÁÉÍÓÚÑ]" js/
 | `[ZONA DE COBERTURA]` | Cobertura de la toma a domicilio (en `js/datos-sitio.js`) |
 | `[PRECIO SUMADO]` | Suma de los estudios del paquete por separado |
 | `[TELÉFONO]` | Teléfono. Va también en los `href="tel:..."` |
-| `[CORREO]` | Correo. Va también en el `href="mailto:..."` |
-| `[DIRECCIÓN COMPLETA]`, `[COLONIA, CIUDAD, CP]` | Domicilio |
-| `[HORARIO]` | Horario de atención |
 | `[HORARIO DEL PORTAL]` | Disponibilidad del portal de resultados |
 | `[N] años`, `[N] estudios`, `[N] horas` | Cifras reales de operación |
 | `[NOMBRE, CÉD. PROF.]`, `[NÚMERO]`, `[XX]` | Responsable sanitario e iniciales |
@@ -72,7 +70,35 @@ grep -rn "\[[A-ZÁÉÍÓÚÑ]" js/
 | `[TESTIMONIO REAL DE UN PACIENTE...]` | Testimonio real, con permiso |
 | `[NOMBRE DEL PACIENTE]`, `[FECHA]` | Autor del testimonio |
 
-El `[AÑO]` del pie se rellena solo con JavaScript.
+El `[AÑO]` del pie se rellena solo con JavaScript. El bloque CONTACTO del pie
+(dirección, teléfono y horario) tampoco tiene marcadores: se rellena con la
+sucursal que el visitante elige al entrar — ver "Elección de sucursal".
+
+## Elección de sucursal
+
+Al abrir el sitio aparece un diálogo que pregunta cuál sucursal le queda más
+cerca al visitante. No se puede cerrar sin elegir: no tiene botón de cerrar, el
+clic en el velo no lo cierra y Escape se ignora.
+
+La respuesta se usa para pintar el bloque CONTACTO del pie — dirección,
+teléfono y horario de esa sucursal — que de otro modo no tendría un solo dato
+correcto que mostrar, porque hay siete sucursales.
+
+- **Las opciones salen de `js/datos-sucursales.js`.** Agregar o quitar una
+  sucursal ahí la agrega o la quita del diálogo. No hay nada que tocar aparte.
+- El marcado está en `js/componentes.js`, componente `almar-sucursal-modal`.
+- La lógica está al final de `js/principal.js`, sección "Elección de sucursal".
+- Los estilos reusan el modal del catálogo (`.modal`, `.modal__velo`,
+  `.modal__panel`); en `css/estilos.css` solo se agregan las clases
+  `.eleccion__*`.
+
+**La elección no se guarda.** Vive en memoria: al recargar se vuelve a
+preguntar. Si algún día conviene recordarla, el cambio es guardar el índice en
+`localStorage` dentro de `elegirSucursal()` y leerlo antes de abrir el diálogo.
+
+El horario del pie lleva "Lun a Sáb" adelante, salvo en las sucursales con
+`abierto24: true`, donde el texto ya dice "Abierto las 24 horas". Los datos no
+traen horario de domingo, así que ese renglón no se pinta.
 
 ## Mantener el catálogo
 
@@ -113,6 +139,35 @@ Todo vive en `js/datos-sucursales.js`. Para agregar una, copia un bloque:
 dígitos). Campos opcionales: `principal: true` para el recuadro destacado,
 `insignia: '24 HORAS'` y `abierto24: true` para resaltar el horario.
 
+## El chat de MIA
+
+En la esquina inferior derecha vive un chat flotante con **MIA**, presentada
+como asistente de IA de ALMAR. Es una **maqueta**: no hay servidor, no hay
+modelo detrás y la conversación **no se guarda** — al recargar la página el
+hilo vuelve a estar vacío.
+
+Cómo responde: busca en `js/datos-chat.js` la primera entrada de `respuestas`
+cuya clave aparezca en el mensaje del paciente; si ninguna coincide, contesta
+con `respaldo`. Las claves se comparan sin acentos ni mayúsculas, así que
+escríbelas en minúscula y sin acentos.
+
+```js
+{
+  claves: ['horario', 'abren', 'cierran'],
+  texto: 'La Matriz abre de 7:00 am a 7:00 pm…'
+}
+```
+
+También ahí se editan el `saludo` y las cuatro `sugerencias` que salen como
+pastillas antes del primer mensaje. Los datos que cita MIA (horarios,
+teléfonos) están copiados de `js/datos-sucursales.js`: si cambian allá,
+cámbialos también aquí.
+
+La burbuja late todo el tiempo con un anillo verde, y cada 10 segundos su icono
+cambia a uno de conversación durante 2 segundos, para invitar al clic. Con
+"reducir movimiento" activado en el sistema, se queda quieta, sin anillo y sin
+cambio de icono.
+
 ## Editar el texto de una sección
 
 Cada sección es un componente en `js/componentes.js`. Busca su nombre
@@ -144,6 +199,11 @@ El formulario de resultados es **una maqueta**: valida los campos y muestra un
 aviso, pero no consulta nada. Para que funcione hay que enlazarlo con el
 sistema de resultados de ALMAR (ver el `addEventListener('submit')` al final de
 `js/principal.js`).
+
+El chat de MIA es **una maqueta**: responde con el guion fijo de
+`js/datos-chat.js` y no consulta ningún servicio. Para conectarlo con una IA o
+con un agente real, hay que sustituir `chatResponder()` en `js/principal.js`
+por una llamada al backend.
 
 Los botones "Agendar estudio" apuntan al teléfono. Si hay sistema de citas en
 línea, cambia esos `href`.

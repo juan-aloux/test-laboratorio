@@ -68,6 +68,19 @@ const ICONOS = (function () {
 
     // --- Catálogo ---
     cerrar:     function (t, c) { return svg(t || 20, c, 1.8, '<path d="M18 6 6 18M6 6l12 12"></path>'); },
-    galon:      function (t, c) { return svg(t || 16, c, 1.8, '<path d="m9 18 6-6-6-6"></path>'); }
+    galon:      function (t, c) { return svg(t || 16, c, 1.8, '<path d="m9 18 6-6-6-6"></path>'); },
+
+    // --- Chat MIA ---
+    // La burbuja del chat va a 26 px: con el trazo de 1.6 de 'chat' se vería
+    // demasiado fina a ese tamaño, por eso lleva icono propio.
+    chatBurbuja: function (t, c) { return svg(t || 26, c, 1.7, '<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.7 9.7 0 0 1-2.7-.4L4 21l1.6-4.3A8.2 8.2 0 0 1 4 11.5a8.4 8.4 0 0 1 9-8.4 8.4 8.4 0 0 1 8 8.4z"></path><path d="M9 11h.01M12.5 11h.01M16 11h.01"></path>'); },
+    enviar:      function (t, c) { return svg(t || 18, c, 1.8, '<path d="m22 2-7 20-4-9-9-4 20-7z"></path>'); },
+    chispa:      function (t, c) { return svg(t || 18, c, 1.7, '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"></path>'); },
+
+    // Dos bocadillos escalonados (Lucide 'messages-square', ISC). Se asoma
+    // cada tanto en la burbuja para invitar al clic. Va de trazo 2: a 26 px
+    // los bocadillos cuadrados aguantan más grosor que los redondos, y así
+    // contrasta con el icono de reposo, que es redondo y de trazo 1.7.
+    conversacion: function (t, c) { return svg(t || 26, c, 2, '<path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z"></path><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"></path>'); }
   };
 })();
