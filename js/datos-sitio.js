@@ -65,27 +65,6 @@ const SERVICIOS = [
   }
 ];
 
-/* Columnas de navegación del pie. */
-const PIE_COLUMNAS = [
-  {
-    titulo: 'ESTUDIOS',
-    enlaces: [
-      { texto: 'Catálogo completo',      href: '#estudios' },
-      { texto: 'Paquetes',               href: '#estudios' },
-      { texto: 'Toma a domicilio',       href: '#estudios' },
-      { texto: 'Convenios con empresas', href: '#contacto' }
-    ]
-  },
-  {
-    titulo: 'SERVICIOS',
-    // Se generan desde SERVICIOS (arriba en este mismo archivo): agregar o
-    // quitar un servicio ahí lo agrega o lo quita también del pie.
-    enlaces: SERVICIOS.map(function (s) {
-      return { texto: s.titulo, href: '#servicios' };
-    })
-  }
-];
-
 /* Enlaces del menú principal. Se usan en la cabecera. */
 const NAVEGACION = [
   { texto: 'Estudios',      href: '#estudios' },

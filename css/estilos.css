@@ -629,7 +629,7 @@ a:hover { color: var(--verde-hover); }
 
 /* --- Pie de página ----------------------------------------------------- */
 .pie { padding-block: 60px 30px; background: var(--marino); color: var(--texto-claro); }
-.pie__rejilla { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 44px; }
+.pie__rejilla { display: grid; grid-template-columns: 1.4fr 1.6fr .8fr 1.2fr; gap: 44px; }
 .pie__marca { display: flex; flex-direction: column; gap: 16px; }
 .pie__logo {
   align-self: flex-start;
@@ -653,6 +653,20 @@ a:hover { color: var(--verde-hover); }
    dejarían el hueco del gap de la columna. */
 .pie__dato:empty { display: none; }
 .pie__columna a:hover { color: var(--lima); }
+
+/* Las 7 sucursales caben en dos filas dentro de su columna. */
+.pie__sucursales { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; }
+.pie__sucursal { display: flex; flex-direction: column; gap: 1px; }
+.pie__sucursal-nombre { font-size: 14px; font-weight: 600; color: var(--texto-claro); }
+.pie__sucursal-tel { font-size: 13px; color: var(--texto-footer); }
+.pie__sucursal:hover .pie__sucursal-nombre,
+.pie__sucursal:hover .pie__sucursal-tel { color: var(--lima); }
+.pie__insignia {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--verde-footer);
+}
 
 .pie__legal {
   display: flex;
@@ -1311,6 +1325,9 @@ body.con-modal .chat { display: none; }
    de colapsar a una sola columna en 1080px. */
 @media (max-width: 1280px) {
   .pie__rejilla { grid-template-columns: 1fr 1fr; gap: 36px; }
+  /* Con dos columnas, sucursales ocupa el ancho completo: sus dos
+     sub-columnas necesitan aire. */
+  .pie__columna--sucursales { grid-column: 1 / -1; }
   .hero .contenedor { gap: 40px; }
 }
 

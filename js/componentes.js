@@ -335,10 +335,6 @@
           '<p>Estudios de rutina sin cita previa. Para paquetes y toma a domicilio, escríbenos y te confirmamos horario.</p>' +
           '<div class="llamado__acciones">' +
             '<a class="boton boton--claro" href="tel:[TELÉFONO]">Agendar estudio</a>' +
-            '<a class="boton boton--sobre-verde" href="tel:[TELÉFONO]">' +
-              I.telefonoGrueso(18) +
-              '[TELÉFONO]' +
-            '</a>' +
           '</div>' +
         '</div>' +
       '</section>';
@@ -347,18 +343,22 @@
   /* --- Pie ---------------------------------------------------------------- */
 
   componente('almar-pie', function () {
-    var columnas = PIE_COLUMNAS.map(function (col) {
-      var enlaces = col.enlaces.map(function (e) {
-        return '<a href="' + e.href + '">' + e.texto + '</a>';
-      }).join('');
+    // Sucursales: nombre y primer teléfono. La lista sale de SUCURSALES, así que
+    // agregar una sucursal ahí la agrega también al pie.
+    var sucursales = SUCURSALES.map(function (suc) {
+      var tel = suc.telefonos[0];
+      var insignia = suc.insignia
+        ? ' <span class="pie__insignia">' + suc.insignia + '</span>'
+        : '';
 
-      // El aria-label toma la inicial mayúscula del título: ESTUDIOS → Estudios.
-      var etiqueta = col.titulo.charAt(0) + col.titulo.slice(1).toLowerCase();
+      return '<a class="pie__sucursal" href="tel:' + tel.tel + '">' +
+               '<span class="pie__sucursal-nombre">' + suc.nombre + insignia + '</span>' +
+               '<span class="pie__sucursal-tel">' + tel.texto + '</span>' +
+             '</a>';
+    }).join('');
 
-      return '<nav class="pie__columna" aria-label="' + etiqueta + '">' +
-               '<span class="pie__titulo">' + col.titulo + '</span>' +
-               enlaces +
-             '</nav>';
+    var navegacion = NAVEGACION.map(function (e) {
+      return '<a href="' + e.href + '">' + e.texto + '</a>';
     }).join('');
 
     return '' +
@@ -372,7 +372,15 @@
               '<p class="pie__descripcion">Laboratorio de análisis clínicos. Precios publicados, resultados validados y firmados.</p>' +
             '</div>' +
 
-            columnas +
+            '<nav class="pie__columna pie__columna--sucursales" aria-label="Sucursales">' +
+              '<span class="pie__titulo">SUCURSALES</span>' +
+              '<div class="pie__sucursales">' + sucursales + '</div>' +
+            '</nav>' +
+
+            '<nav class="pie__columna" aria-label="Navegación">' +
+              '<span class="pie__titulo">NAVEGACIÓN</span>' +
+              navegacion +
+            '</nav>' +
 
             /* Los datos de contacto dependen de la sucursal que el visitante
                elige al entrar. Arrancan vacíos; principal.js los pinta.
